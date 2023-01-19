@@ -1,23 +1,15 @@
 import Fastify from "fastify";
 import cors from '@fastify/cors'
-import { PrismaClient } from '@prisma/client'
+import { appRoutes } from "./routes";
 
 /* Cria o app */
 const app = Fastify();
-
-/* Ascessa o db */
-const prisma = new PrismaClient();
 
 /* Controle de ascesso */
 app.register(cors)
 
 /* Rotas */
-app.get('/hello', async () =>{
-
-    const habits = await prisma.habit.findMany()
-
-    return habits
-})
+app.register(appRoutes)
 
 /* Iniciar o servidor na porta 3333 */
 app.listen({

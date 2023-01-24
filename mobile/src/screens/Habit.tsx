@@ -21,7 +21,7 @@ export function Habit(){
     const dayOfWeek = parseDate.format('dddd')
     const dayAndMouth = parseDate.format('DD/MM')
 
-    console.log(date,dayAndMouth,dayOfWeek)
+    /* console.log(date,dayAndMouth,dayOfWeek) */
 
     return(
         <View className="flex-1 bg-background px-8 pt-16">

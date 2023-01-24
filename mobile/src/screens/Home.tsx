@@ -1,10 +1,15 @@
-import { View, Text, ScrollView  } from "react-native"
-import { useNavigation } from "@react-navigation/native"
+import { useEffect, useState } from "react";
 
-import { generateRangeDatesFromYearStart } from '../utils/generate-range-between-dates'
+import { View, Text, ScrollView, Alert  } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
-import { HabitDay, DAY_SIZE } from "../components/HabitDay"
-import { Header } from "../components/Header"
+import { api } from "../lib/axios";
+import { generateRangeDatesFromYearStart } from '../utils/generate-range-between-dates';
+
+import { HabitDay, DAY_SIZE } from "../components/HabitDay";
+import { Header } from "../components/Header";
+import { Loading } from "../components/Loading";
+import dayjs from "dayjs";
 
 const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'] 
 
@@ -12,10 +17,47 @@ const datesFromYearStart = generateRangeDatesFromYearStart();
 const minimumSumaryDatesSize = 18 * 5;
 const amountOfDaysToFill = minimumSumaryDatesSize - datesFromYearStart.length ;
 
+type SummaryProps = Array<{
+    id: string;
+    date: string;
+    amount: number;
+    completed: number;
+}>
 
 export function Home() {
 
+    const [loading, setLoading ] = useState(true)
+    const [ summary, setSummary ] = useState<SummaryProps | null>(null)
+
     const { navigate } = useNavigation();
+
+    async function fechData(){
+        try {
+            setLoading(true)
+            const response = await api.get('/summary')
+            setSummary(response.data)
+            console.log(response.data)
+            
+        } catch (error) {
+
+            Alert.alert('Uepa...','Algo de errado não está certo!')
+            console.log(error);
+
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fechData()
+    }, [])
+
+    if(loading){
+        return(
+            <Loading />
+        );
+    }
+
     return (
     <View className="flex-1 bg-background px-8 pt-16">
         
@@ -38,29 +80,40 @@ export function Home() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100}}
         >
+            { summary &&
+                <View className="flex-row flex-wrap ">
 
-            <View className="flex-row flex-wrap ">
-
-                {
-                    datesFromYearStart.map(date => (
-                        <HabitDay 
-                            onPress={() => navigate('habit', {date : date.toISOString()})}
-                            key={date.toISOString()}
+                    {
+                        datesFromYearStart.map(date => {
+                            
+                            const dayWhithHabits = summary.find(day => {
+                                return dayjs(date).isSame(day.date, 'day')
+                            })
+                            
+                            return (
+                                <HabitDay 
+                                date={date}
+                                key={date.toISOString()}
+                                amountOfHabits={dayWhithHabits?.amount}
+                                amountCompleted={dayWhithHabits?.completed}
+                                onPress={() => navigate('habit', {date : date.toISOString()})}
+                            />
+                        )})
+                    }
+                    {
+                    amountOfDaysToFill > 0 && Array
+                    .from({ length: amountOfDaysToFill })
+                    .map((_, i) => (
+                        <View
+                            key={i}
+                            className="bg-zin-900 rounded-lg border-2 m-1 border-zinc-800 opacity-40"
+                            style={{ width: DAY_SIZE, height: DAY_SIZE }}
                         />
                     ))
                 }
-                {
-                amountOfDaysToFill > 0 && Array
-                .from({ length: amountOfDaysToFill })
-                .map((_, i) => (
-                    <View
-                        key={i}
-                        className="bg-zin-900 rounded-lg border-2 m-1 border-zinc-800 opacity-40"
-                        style={{ width: DAY_SIZE, height: DAY_SIZE }}
-                    />
-                ))
+                </View>
             }
-            </View>
+
         </ScrollView>
         
     </View>

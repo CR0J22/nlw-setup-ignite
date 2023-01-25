@@ -27,7 +27,7 @@ export function New(){
         try {
 
             if(!title.trim() || weekDays.length === 0){
-                Alert.alert('Novo Hábito', 'Informe o nome do Hábito e defina a recorrência')
+               return Alert.alert('Novo Hábito', 'Informe o nome do Hábito e defina a recorrência')
             }
 
             await api.post('/habits',{ title, weekDays })

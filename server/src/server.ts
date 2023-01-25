@@ -14,6 +14,7 @@ app.register(appRoutes)
 /* Iniciar o servidor na porta 3333 */
 app.listen({
     port: 3333,
-}).then(()=>{
-    console.log('HTTP server Running')
+    host: '0.0.0.0',
+}).then((url)=>{
+    console.log(`HTTP server Running ${url}`)
 })
